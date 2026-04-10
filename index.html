@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>甘特圖</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+
+    h2 {
+        margin-bottom: 10px;
+    }
+
+    .gantt-container {
+        overflow-x: auto;
+        border: 1px solid #ddd;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 900px;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 6px;
+        text-align: center;
+        font-size: 12px;
+    }
+
+    th {
+        background: #f5f5f5;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+    }
+
+    .task-name {
+        text-align: left;
+        font-weight: bold;
+        background: #fafafa;
+        position: sticky;
+        left: 0;
+        z-index: 1;
+    }
+
+    .bar {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .deadline {
+        background: #ff6b6b !important;
+        color: white;
+    }
+
+    .today {
+        background: #ffeaa7;
+    }
+</style>
+</head>
+<body>
+
+<h2>專案甘特圖</h2>
+
+<div class="gantt-container">
+<table id="gantt"></table>
+</div>
+
+<script>
+
+// ======== 工作資料設定 ========
+const tasks = [
+    {
+        name: "需求分析",
+        start: "2026-04-10",
+        end: "2026-04-14",
+        deadline: "2026-04-14"
+    },
+    {
+        name: "UI設計",
+        start: "2026-04-13",
+        end: "2026-04-18",
+        deadline: "2026-04-18"
+    },
+    {
+        name: "前端開發",
+        start: "2026-04-16",
+        end: "2026-04-25",
+        deadline: "2026-04-25"
+    },
+    {
+        name: "測試",
+        start: "2026-04-26",
+        end: "2026-04-30",
+        deadline: "2026-04-30"
+    }
+];
+
+// ======== 工具函式 ========
+function formatDate(date) {
+    return date.toISOString().split('T')[0];
+}
+
+function addDays(date, days) {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
+}
+
+// ======== 取得日期範圍 ========
+let startDate = new Date(tasks[0].start);
+let endDate = new Date(tasks[0].end);
+
+tasks.forEach(task => {
+    if (new Date(task.start) < startDate) startDate = new Date(task.start);
+    if (new Date(task.end) > endDate) endDate = new Date(task.end);
+});
+
+// ======== 建立日期列表 ========
+const dates = [];
+let current = new Date(startDate);
+
+while (current <= endDate) {
+    dates.push(formatDate(current));
+    current = addDays(current, 1);
+}
+
+// ======== 建立表格 ========
+const table = document.getElementById('gantt');
+
+// Header
+const header = document.createElement('tr');
+
+const taskHeader = document.createElement('th');
+taskHeader.innerText = "工作項目";
+header.appendChild(taskHeader);
+
+dates.forEach(date => {
+    const th = document.createElement('th');
+    th.innerText = date.substring(5);
+    header.appendChild(th);
+});
+
+table.appendChild(header);
+
+// Rows
+tasks.forEach(task => {
+    const row = document.createElement('tr');
+
+    const taskName = document.createElement('td');
+    taskName.className = 'task-name';
+    taskName.innerText = task.name;
+    row.appendChild(taskName);
+
+    dates.forEach(date => {
+        const cell = document.createElement('td');
+
+        if (date >= task.start && date <= task.end) {
+            cell.classList.add('bar');
+        }
+
+        if (date === task.deadline) {
+            cell.classList.add('deadline');
+        }
+
+        row.appendChild(cell);
+    });
+
+    table.appendChild(row);
+});
+
+</script>
+
+</body>
+</html>
